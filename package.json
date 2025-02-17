@@ -23,7 +23,6 @@
     "element-plus": "^2.8.7",
     "ffi-rs": "^1.2.5",
     "pinia": "^2.1.7",
-    "serialport": "^12.0.0",
     "vue": "^3.3.4",
     "vue-router": "^4.3.2"
   },
