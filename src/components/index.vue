@@ -5,7 +5,11 @@
                 <el-descriptions :column="3" title="证件信息" border class="id_card">
                     <template #extra>
                         <el-button type="primary" @click="ssOpenDevice">连接设备</el-button>
+                        <el-button type="primary" @click="ssCloseDevice">关闭设备</el-button>
+                        <el-button type="primary" @click="ssQueryDeviceHeartBeat">查询心跳</el-button>
+                        <el-button type="primary" @click="ssFindCard">神思寻卡</el-button>
                         <el-button type="primary" @click="ssReadCard">神思读卡</el-button>
+
                     </template>
                     <el-descriptions-item :rowspan="3" label="人像照片" align="center" min-width="100px">
                         <p v-if="!card_date.photo" style="color: darkgray;">暂无照片</p>
@@ -63,10 +67,27 @@ const addLog = (msg) => {
 };
 
 const ssOpenDevice = () => {
+    addLog('打开设备');
     window.electron.openSsDevice();
 }
 
+const ssCloseDevice = () => {
+    addLog('关闭设备');
+    window.electron.closeSsDevice();
+}
+
+const ssQueryDeviceHeartBeat = () => {
+    addLog('查询设备心跳');
+    window.electron.querySsDeviceHeartBeat();
+}
+
+const ssFindCard = () => {
+    addLog('寻卡中...');
+    window.electron.findSsCard();
+}
+
 const ssReadCard = () => {
+    addLog('读取二代证');
     window.electron.readSsCard();
 }
 
@@ -77,8 +98,19 @@ onMounted(() => {
         window.electron.onSsMessage((data) => {
             console.log('收到神思消息', data);
             addLog(JSON.stringify(data));
-            if (data.state && data.type === 'read_card') {
-                card_date.value = data.data;
+            //设备打开
+            if (data.type === 'open_device') {
+                
+            }
+            //设备关闭
+            if (data.type === 'close_device') {
+                
+            }
+            //收到证件信息
+            if (data.type === 'read_card') {
+                if(data.state){
+                    card_date.value = data.data;
+                }
             }
         })
     );
@@ -124,22 +156,26 @@ onBeforeUnmount(() => {
 }
 </style>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .id_card {
     .el-descriptions__body .el-descriptions__table.is-bordered .el-descriptions__cell {
         padding: 16px 6px;
     }
 }
 
-.logContainer{
+.logContainer {
     background-color: rgb(240, 240, 240);
     width: 100%;
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 3;
 }
 
-.log-entry{
+.log-entry {
     word-break: break-all;
 }
 </style>

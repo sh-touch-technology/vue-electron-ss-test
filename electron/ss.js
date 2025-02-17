@@ -42,30 +42,113 @@ const ssOpenDevice = () => {
             ],
             paramsValue: ['AUTO', '', 'extendPara'],  // 传递的参数值
         });
-        if (result > 0) {
+        if (result > 0 && result < 100000) {
             return {
-                type: 'open_device',
-                state: true,
-                message: '打开设备成功，设备句柄：' + result
+                type: 'open_device', state: true, message: '打开设备成功，设备句柄：' + result
             }
         }
         else {
             return {
-                type: 'open_device',
-                state: false,
-                message: '打开设备失败，返回值：' + result
+                type: 'open_device', state: false, message: '打开设备失败，返回值：' + result
             }
         }
     }
     catch (error) {
         return {
-            type: 'open_device',
-            state: false,
-            message: '打开设备失败，异常：' + error
+            type: 'open_device', state: false, message: '打开设备失败，异常：' + error
         }
     }
 };
 
+//关闭设备
+const ssCloseDevice = () => {
+    try {
+        const result = load({
+            library: "CommonInterface",  // 动态库名称
+            funcName: "CloseDevice",  // 函数名称
+            retType: DataType.I64,   // 返回类型为 long（通常为 I64）
+            paramsType: [],
+            paramsValue: [],  // 传递的参数值
+        });
+        if (result === 0) {
+            return {
+                type: 'close_device', state: true, message: '设备关闭成功'
+            };
+        }
+        else {
+            return {
+                type: 'close_device', state: false, message: '设备关闭失败，返回值：' + result
+            };
+        }
+    } catch (error) {
+        return {
+            type: 'close_device', state: false, message: '设备关闭异常，错误：' + error
+        };
+    }
+}
+
+//神思轮询心跳
+function ssQueryHeartBeat() {
+    try {
+        const result = load({
+            library: "CommonInterface",  // 动态库名称
+            funcName: "TerminalHeartBeat",    // 函数名称
+            retType: DataType.I64,     // 返回值类型：long
+            paramsType: [
+            ],
+            paramsValue: [
+            ],
+        });
+        if (result === 0) {
+            return {
+                type: 'device_heart_beat', state: true, message: '设备心跳成功'
+            };
+        }
+        else {
+            return {
+                type: 'device_heart_beat', state: false, message: '设备心跳查询失败，返回值：' + result
+            };
+        }
+    }
+    catch (error) {
+        return {
+            type: 'device_heart_beat', state: false, message: '设备心跳查询失败，错误：' + error
+        };
+    }
+}
+
+//神思寻卡
+function ssFindCard() {
+    try {
+        const result = load({
+            library: "CommonInterface",  // 动态库名称
+            funcName: "IdFindCard",    // 函数名称
+            retType: DataType.I64,     // 返回值类型：long
+            paramsType: [
+            ],
+            paramsValue: [
+            ],
+        });
+        if (result === 0) {
+            return {
+                type: 'find_card',
+                state: true,
+                message: '已发现卡片'
+            };
+        } else {
+            return {
+                type: 'find_card', state: false, message: '未发现卡片，返回值：' + result
+            }
+        }
+    }
+    catch (error) {
+        return {
+            type: 'find_card', state: false, message: '寻卡异常，错误：' + error
+        }
+    }
+}
+
+//神思读取二代证
 const ssReadCard = (cardType, infoEncoding, timeOutMs) => {
     try {
         let idCardInfo = Buffer.alloc(10240);  // 至少分配10240字节的内存来存储读取的卡信息
@@ -89,35 +172,39 @@ const ssReadCard = (cardType, infoEncoding, timeOutMs) => {
 
         if (result === 0) {
             return {
-                type: 'read_card',
-                state: true,
-                message: '读取成功',
-                data: parseStringToObject(idCardInfo.toString('utf-8', 0, idCardInfo.indexOf(0)))
+                type: 'read_card', state: true, message: '读取成功', data: parseStringToObject(idCardInfo.toString('utf-8', 0, idCardInfo.indexOf(0)))
             };
         } else {
             return {
-                type: 'read_card',
-                state: false,
-                message: '读卡失败，返回值：' + result
+                type: 'read_card', state: false, message: '读卡失败，返回值：' + result
             }
         }
     }
     catch (error) {
         return {
-            type: 'read_card',
-            state: false,
-            message: '读卡失败，异常：' + error
+            type: 'read_card', state: false, message: '读卡失败，异常：' + error
         }
     }
 };
-
 
 function openDevice(view) {
     view.webContents.send('ss-message', ssOpenDevice());
 }
 
+function closeDevice(view) {
+    view.webContents.send('ss-message', ssCloseDevice());
+}
+
+function queryHeartBeat(view) {
+    view.webContents.send('ss-message', ssQueryHeartBeat());
+}
+
 function readCard(view) {
     view.webContents.send('ss-message', ssReadCard(0x00, 0x03, 5000));
+}
+
+function findCard(view) {
+    view.webContents.send('ss-message', ssFindCard());
 }
 
 function parseStringToObject(str) {
@@ -134,4 +221,4 @@ function parseStringToObject(str) {
     return result;
 }
 
-module.exports = { openDevice, readCard }
+module.exports = { openDevice, closeDevice, queryHeartBeat, readCard, findCard }

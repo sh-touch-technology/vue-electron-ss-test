@@ -1,8 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const { createMainWindowView, openDialog, openMainwindowDevTools, maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow } = require('./functions');
-const { openSerialPort, releaseSerialPort, sendSerialPortMessage, getSerialPortList } = require('./serial');
 const { printLog, initLog } = require('./utils');
-const { openDevice, readCard } = require('./ss');
+const { openDevice, closeDevice, queryHeartBeat, readCard, findCard } = require('./ss');
 
 initLog();
 
@@ -15,27 +14,6 @@ function createWindow() {
 
     //创建浏览器窗口
     mainWindow = createMainWindowView();
-
-    //打开串口
-    ipcMain.on('serial-open-port', (event, com) => {
-        openSerialPort(com, mainWindow);
-    });
-
-    //释放串口
-    ipcMain.on('serial-release-port', () => {
-        releaseSerialPort(mainWindow);
-    });
-
-    //发送串口消息
-    ipcMain.on('serial-send-message', (event, dataArray) => {
-        sendSerialPortMessage(dataArray, mainWindow);
-    });
-
-    //获取串口列表
-    ipcMain.on('serial-get-port-list', () => {
-        console.log('serial-get-port-list');
-        getSerialPortList(mainWindow);
-    });
 
     //渲染进程调用应用程序重启
     ipcMain.handle('app-relaunch', () => {
@@ -86,10 +64,25 @@ function createWindow() {
         openDevice(mainWindow);
     });
 
+    //关闭神思设备
+    ipcMain.on('close-ss-device', () => {
+        closeDevice(mainWindow);
+    });
+
+    //查询神思设备心跳
+    ipcMain.on('query-ss-device-heart-beat', () => {
+        queryHeartBeat(mainWindow);
+    });
+
     //神思读卡
     ipcMain.on('read-ss-card', () => {
         readCard(mainWindow);
-    })
+    });
+
+    //神思寻卡
+    ipcMain.on('find-ss-card', () => {
+        findCard(mainWindow);
+    });
 }
 
 // 这段程序将会在 Electron 结束初始化和创建浏览器窗口的时候调用部分 API 在 ready 事件触发后才能使用。
