@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]  # 使用矩阵策略分别为 Windows 和 Linux 打包
+        node-version: [18]
+
+    steps:
+      - name: 1.读取仓库
+        uses: actions/checkout@v3
+
+      - name: 2.准备node环境
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: 3.安装依赖
+        run: npm install
+
+      - name: 4.为 Linux 平台单独打包
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          npm run electron:linux-build --linux
+        env:
+          GH_TOKEN: ${{ secrets.SHKJ_CLIENT_RELEASE_TOKEN }}
+
+      - name: 4.为 Windows 平台单独打包
+        if: matrix.os == 'windows-latest'
+        run: |
+          npm run electron:win-build --win
+        env:
+          GH_TOKEN: ${{ secrets.SHKJ_CLIENT_RELEASE_TOKEN }}
+
+      - name: 5.创建Release草稿
+        run: gh release create ${{ github.ref_name }} --draft
+        env:
+          GH_TOKEN: ${{ secrets.SHKJ_CLIENT_RELEASE_TOKEN }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1.读取仓库
+        uses: actions/checkout@v3
+
+      - name: 2.发布
+        run: gh release edit ${{ github.ref_name }} --draft=false
+        env:
+          GH_TOKEN: ${{ secrets.SHKJ_CLIENT_RELEASE_TOKEN }}
