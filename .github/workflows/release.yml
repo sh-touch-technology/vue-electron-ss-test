@@ -25,17 +25,20 @@ jobs:
       - name: 3.安装依赖
         run: npm install
 
-      - name: 4.安装 Ruby 和 fpm
+      - name: 4.删除自动下载的 fpm 并安装 ARM 版本
         if: matrix.os == 'ubuntu-24.04-arm'
         run: |
+          # 删除 electron-builder 自动下载的 x86_64 fpm
+          rm -rf ~/.cache/electron-builder/fpm/
+
           # 安装 Ruby 和 fpm
           sudo apt update
           sudo apt install -y ruby
           sudo gem install fpm
 
-          # 如果 fpm 是从源代码安装的，确保它在缓存路径中
+          # 将安装后的 fpm 拷贝到 electron-builder 期望的目录
           mkdir -p ~/.cache/electron-builder/fpm/
-          cp $(which fpm) ~/.cache/electron-builder/fpm/  # 将 fpm 拷贝到 electron-builder 期望的目录
+          cp $(which fpm) ~/.cache/electron-builder/fpm/  # 将 fpm 拷贝到缓存目录
 
       - name: 4.为 Linux 平台单独打包
         if: matrix.os == 'ubuntu-24.04-arm'
