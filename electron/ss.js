@@ -1,6 +1,7 @@
 const { load, DataType, open, close, arrayConstructor, define } = require('ffi-rs');
 const os = require('os');
 const fs = require('fs');
+const { app } = require('electron');
 const path = require('path');
 const { printLog } = require('./utils')
 
@@ -20,7 +21,7 @@ if (platform === 'win32') {
     }
 }
 else {
-    dll = path.join(__dirname, 'assets', 'linux', 'libCommonInterface.so');
+    dll = path.join(__dirname, '../', 'assets', 'linux', 'libCommonInterface.so');
 }
 
 console.log('dll path test:' + fs.existsSync(dll));
