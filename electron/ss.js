@@ -1,5 +1,6 @@
 const { load, DataType, open, close, arrayConstructor, define } = require('ffi-rs');
 const os = require('os');
+const path = require('path');
 const { printLog } = require('./utils')
 
 const platform = os.platform();
@@ -7,10 +8,10 @@ let dll = '../assets/CommonInterface.dll';
 if (platform === 'win32') {
     const arch = process.arch;
     if (arch === 'x64') {
-        dll = '../assets/win_64/CommonInterface.dll';
+        dll = path.resolve(__dirname, '..\\assets\\win_64\\CommonInterface.dll');
     }
     else if (arch === 'ia32') {
-        dll = '../assets/win_32/CommonInterface.dll';
+        dll = path.resolve(__dirname, '..\\assets\\win_32\\CommonInterface.dll');
     }
     else {
         printLog('当前系统架构不支持：' + arch);
@@ -18,7 +19,7 @@ if (platform === 'win32') {
     }
 }
 else {
-    dll = '../assets/linux/libCommonInterface.so';
+    dll = path.resolve(__dirname, '..\\assets\\linux\\libCommonInterface.so');
 }
 
 //使用前需要打开
