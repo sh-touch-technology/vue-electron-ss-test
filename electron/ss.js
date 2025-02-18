@@ -18,7 +18,7 @@ if (platform === 'win32') {
     }
 }
 else {
-    dll = '../assets/linux/CommonInterface.dll';
+    dll = '../assets/linux/CommonInterface.so';
 }
 
 //使用前需要打开
