@@ -23,11 +23,11 @@ if (platform === 'win32') {
     }
 }
 else {
-    dll = path.join(__dirname,'..', 'assets', 'linux', 'libCommonInterface.so');
+    dll = path.resolve(__dirname, '..\\..\\..\\assets\\linux\\libCommonInterface.so')
 }
 
 console.log('dll path test:'+ dll + fs.existsSync(dll));
-console.log('dll test 2' + path.join(__dirname, '..', 'assets', 'linux', 'libCommonInterface.so') + '：' + fs.existsSync(path.join(__dirname, '..', 'assets', 'linux', 'libCommonInterface.so')));
+console.log('dll test 2' + '../assets/linux/libCommonInterface.so' + '：' + fs.existsSync('../assets/linux/libCommonInterface.so'));
 
 //使用前需要打开
 printLog('加载动态库：' + dll);
