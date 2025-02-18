@@ -25,6 +25,13 @@ jobs:
       - name: 3.安装依赖
         run: npm install
 
+      - name: 3.1.安装fpm
+        if: matrix.os == 'ubuntu-24.04-arm'
+        run: |
+          sudo apt update
+          sudo apt install -y ruby
+          sudo gem install fpm
+
       - name: 4.为 Linux 平台单独打包
         if: matrix.os == 'ubuntu-24.04-arm'
         run: |
