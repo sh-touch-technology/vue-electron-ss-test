@@ -21,7 +21,10 @@ if (platform === 'win32') {
     }
 }
 else {
-    dll = path.join(__dirname, '..', 'assets', 'linux', 'libCommonInterface.so');;
+    const resourcesPath = process.resourcesPath || path.join(__dirname, '..', 'resources');
+    // 构建目标文件的路径
+    const targetFilePath = path.join(resourcesPath, 'linux', 'libCommonInterface.so');
+    dll = targetFilePath;
 }
 
 console.log('dll path test:' + fs.existsSync(dll));
