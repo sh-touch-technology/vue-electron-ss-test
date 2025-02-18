@@ -12,7 +12,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]  # 使用矩阵策略分别为 Windows 和 Linux 打包
         node-version: [18]
-        arch: [x64, arm64]  # 定义多个架构
+        arch: [x64, arm64]  # 为不同架构定义 matrix
 
     steps:
       - name: 1.读取仓库
@@ -26,17 +26,24 @@ jobs:
       - name: 3.安装依赖
         run: npm install
         env:
-          npm_config_arch: ${{ matrix.arch }}  # 设置 npm_config_arch 环境变量
+          npm_config_arch: ${{ matrix.arch }}  # 使用架构来安装相应版本的依赖
 
-      - name: 4.为 Linux 平台单独打包 for ${{ matrix.os }} with ${{ matrix.arch }}
-        if: matrix.os == 'ubuntu-latest'
+      - name: 4.为 Linux 平台单独打包 (x64)
+        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'x64'  # 仅当系统为 ubuntu 且架构为 x64 时打包
         run: |
-          npm run electron:linux-build --linux --arch ${{ matrix.arch }}
+          npm run electron:linux-build --linux --arch x64
+        env:
+          GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
+
+      - name: 4.为 Linux 平台单独打包 (arm64)
+        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'arm64'  # 仅当系统为 ubuntu 且架构为 arm64 时打包
+        run: |
+          npm run electron:linux-build --linux --arch arm64
         env:
           GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
 
       - name: 4.为 Windows 平台单独打包
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-latest'  # Windows 平台打包不受架构影响
         run: |
           npm run electron:win-build --win
         env:
