@@ -10,10 +10,12 @@ let dll = '../assets/CommonInterface.dll';
 if (platform === 'win32') {
     const arch = process.arch;
     if (arch === 'x64') {
-        dll = path.resolve(__dirname, '..\\assets\\win_64\\CommonInterface.dll');
+        //dll = path.resolve(__dirname, '..\\assets\\win_64\\CommonInterface.dll');
+        dll = path.join(__dirname, 'assets', 'win_64', 'libCommonInterface.dll');
     }
     else if (arch === 'ia32') {
-        dll = path.resolve(__dirname, '..\\assets\\win_32\\CommonInterface.dll');
+        //dll = path.resolve(__dirname, '..\\assets\\win_32\\CommonInterface.dll');
+        dll = path.join(__dirname, 'assets', 'win_32', 'libCommonInterface.dll');
     }
     else {
         printLog('当前系统架构不支持：' + arch);
@@ -21,14 +23,11 @@ if (platform === 'win32') {
     }
 }
 else {
-    const resourcesPath = process.resourcesPath || path.join(__dirname, '..', 'resources');
-    // 构建目标文件的路径
-    const targetFilePath = path.join(resourcesPath, 'linux', 'libCommonInterface.so');
-    dll = targetFilePath;
+    dll = path.join(__dirname, 'assets', 'linux', 'libCommonInterface.so');
 }
 
 console.log('dll path test:' + fs.existsSync(dll));
-console.log('dll test 2' + path.join(__dirname, 'assets', 'linux', 'libCommonInterface.so') + '：' + fs.existsSync(path.join(__dirname, 'assets', 'linux', 'libCommonInterface.so')));
+console.log('dll test 2' + path.join(__dirname, '..', 'assets', 'linux', 'libCommonInterface.so') + '：' + fs.existsSync(path.join(__dirname, '..', 'assets', 'linux', 'libCommonInterface.so')));
 
 //使用前需要打开
 printLog('加载动态库：' + dll);

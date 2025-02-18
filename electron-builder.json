@@ -2,12 +2,12 @@
     "productName": "神思读卡器测试",
     "files": [
         "./electron",
-        "./dist"
+        "./dist",
+        "./assets"
     ],
     "extraFiles": [
         "./videos",
-        "./cvideo",
-        "./assets"
+        "./cvideo"
     ],
     "directories": {
         "output": "./builder"
