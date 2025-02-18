@@ -12,6 +12,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]  # 使用矩阵策略分别为 Windows 和 Linux 打包
         node-version: [18]
+        arch: [x64, arm64]  # 定义多个架构
 
     steps:
       - name: 1.读取仓库
@@ -24,11 +25,13 @@ jobs:
 
       - name: 3.安装依赖
         run: npm install
+        env:
+          npm_config_arch: ${{ matrix.arch }}  # 设置 npm_config_arch 环境变量
 
-      - name: 4.为 Linux 平台单独打包
+      - name: 4.为 Linux 平台单独打包 for ${{ matrix.os }} with ${{ matrix.arch }}
         if: matrix.os == 'ubuntu-latest'
         run: |
-          npm run electron:linux-build --linux
+          npm run electron:linux-build --linux --arch ${{ matrix.arch }}
         env:
           GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
 
