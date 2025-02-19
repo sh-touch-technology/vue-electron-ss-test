@@ -24,7 +24,7 @@ if (platform === 'win32') {
     }
 }
 else {
-    dll = path.resolve(appPath, '..', 'assets', 'linux', 'libCommonInterface.so');
+    dll = path.resolve(__dirname, '..', 'assets', 'linux', 'libCommonInterface.so');
 }
 console.log('app path:' + appPath);
 console.log('dll path test1:' + dll + fs.existsSync(dll));
