@@ -7,6 +7,7 @@ const { printLog } = require('./utils')
 
 const platform = os.platform();
 let dll = '../assets/CommonInterface.dll';
+const appPath = app.getAppPath();
 if (platform === 'win32') {
     const arch = process.arch;
     if (arch === 'x64') {
@@ -23,7 +24,7 @@ if (platform === 'win32') {
     }
 }
 else {
-    dll = path.resolve(__dirname, 'assets', 'linux', 'libCommonInterface.so');
+    dll = path.resolve(appPath, 'assets', 'linux', 'libCommonInterface.so');
 }
 
 console.log('dll path test:' + dll + fs.existsSync(dll));
