@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]  # 使用矩阵策略分别为 Windows 和 Linux 打包
-        node-version: [18]
+        node-version: [16]   # 使用较低版本的 Node.js
 
     steps:
       - name: 1.读取仓库
@@ -24,10 +24,9 @@ jobs:
 
       - name: 3.安装依赖
         run: |
-          # 安装构建依赖和libffi-dev
           sudo apt-get update
-          sudo apt-get install -y build-essential libffi-dev
-          npm install
+          sudo apt-get install -y build-essential libffi-dev python3 python3-pip python3-dev
+          npm install --unsafe-perm=true --build-from-source
 
       - name: 4.为 Linux 平台单独打包
         if: matrix.os == 'ubuntu-latest'
