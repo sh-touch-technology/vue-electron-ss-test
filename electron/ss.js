@@ -73,6 +73,27 @@ const ssOpenDevice = (PortType, PortPara, ExtendPara) => {
     }
 };
 
+const ssOpenDevice1 = async (PortType, PortPara, ExtendPara) => {
+    if (!PortType) {
+        PortType = 'AUTO';
+    }
+    printLog('打开设备1，library：' + dll + '，参数：PortType：' + PortType + '，PortPara：' + PortPara + '，ExtendPara：' + ExtendPara);
+
+    // 将返回一个promise,但任务将在新线程中运行
+    return load({
+        library: dll,  // 动态库名称
+        funcName: "OpenDevice",  // 函数名称
+        retType: DataType.I64,   // 返回类型为 long（通常为 I64）
+        paramsType: [
+            DataType.String,  // PortType 类型为字符串
+            DataType.String,  // PortPara 类型为字符串
+            DataType.String,  // ExtendPara 类型为字符串
+        ],
+        paramsValue: [PortType, PortPara, ExtendPara],  // 传递的参数值
+        runInNewThread: true,
+    })
+}
+
 //关闭设备
 const ssCloseDevice = () => {
     try {
@@ -200,8 +221,24 @@ const ssReadCard = (cardType, infoEncoding, timeOutMs) => {
     }
 };
 
-function openDevice(view,data) {
-    view.webContents.send('ss-message', ssOpenDevice(data.PortType, data.PortPara, data.ExtendPara));
+function openDevice(view, data) {
+    //view.webContents.send('ss-message', ssOpenDevice(data.PortType, data.PortPara, data.ExtendPara));
+    ssOpenDevice1(data.PortType, data.PortPara, data.ExtendPara).then((res) => {
+        if (res > 0 && res <= 100000) {
+            view.webContents.send('ss-message', {
+                type: 'open_device', state: true, message: '打开设备成功，设备句柄：' + res
+            });
+        }
+        else {
+            view.webContents.send('ss-message', {
+                type: 'open_device', state: false, message: '打开设备失败了，返回参数：' + res
+            });
+        }
+    }).catch((err) => {
+        view.webContents.send('ss-message', {
+            type: 'open_device', state: false, message: '打开设备异常了，错误：' + err
+        });
+    })
 }
 
 function closeDevice(view) {
