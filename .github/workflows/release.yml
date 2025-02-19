@@ -22,13 +22,18 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: 3.安装依赖
+      - name: 3.安装Python 3.1.0
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.1.0'
+
+      - name: 4.安装依赖
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libffi-dev python3 python3-pip python3-dev
+          sudo apt-get install -y build-essential libffi-dev python3-pip python3-dev
           npm install --unsafe-perm=true --build-from-source
 
-      - name: 4.为 Linux 平台单独打包
+      - name: 5.为 Linux 平台单独打包
         if: matrix.os == 'ubuntu-latest'
         run: |
           export USE_SYSTEM_FPM="true"
@@ -36,7 +41,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
 
-      - name: 5.创建Release草稿
+      - name: 6.创建Release草稿
         run: gh release create ${{ github.ref_name }} --draft
         env:
           GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
