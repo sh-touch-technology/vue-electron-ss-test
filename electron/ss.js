@@ -49,7 +49,7 @@ const ssOpenDevice = () => {
                 DataType.String,  // PortPara 类型为字符串
                 DataType.String,  // ExtendPara 类型为字符串
             ],
-            paramsValue: ['AUTO', '', 'extendPara'],  // 传递的参数值
+            paramsValue: ['AUTO', '', ''],  // 传递的参数值
         });
         if (result > 0 && result < 100000) {
             return {
