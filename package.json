@@ -23,6 +23,7 @@
     "element-plus": "^2.8.7",
     "ffi-napi": "^4.0.3",
     "ffi-rs": "^1.2.5",
+    "koffi": "^2.10.1",
     "node-ffi-rs": "^1.2.5",
     "pinia": "^2.1.7",
     "ref-napi": "^3.0.3",
