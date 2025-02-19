@@ -8,7 +8,6 @@ const { printLog } = require('./utils')
 const platform = os.platform();
 let dll_path;
 let dll;
-const appPath = app.getAppPath();
 if (platform === 'win32') {
     const arch = process.arch;
     dll = 'CommonInterface';
@@ -38,7 +37,12 @@ open({
 });
 
 //打开设备
-const ssOpenDevice = () => {
+const ssOpenDevice = (PortType, PortPara, ExtendPara) => {
+    if (!PortType) {
+        PortType = 'AUTO';
+    }
+    printLog('打开设备，library：' + dll + '，参数：PortType：' + PortType + '，PortPara：' + PortPara + '，ExtendPara：' + ExtendPara);
+
     try {
         const result = load({
             library: dll,  // 动态库名称
@@ -49,7 +53,7 @@ const ssOpenDevice = () => {
                 DataType.String,  // PortPara 类型为字符串
                 DataType.String,  // ExtendPara 类型为字符串
             ],
-            paramsValue: ['AUTO', '', ''],  // 传递的参数值
+            paramsValue: [PortType, PortPara, ExtendPara],  // 传递的参数值
         });
         if (result > 0 && result < 100000) {
             return {
@@ -196,8 +200,8 @@ const ssReadCard = (cardType, infoEncoding, timeOutMs) => {
     }
 };
 
-function openDevice(view) {
-    view.webContents.send('ss-message', ssOpenDevice());
+function openDevice(view,data) {
+    view.webContents.send('ss-message', ssOpenDevice(data.PortType, data.PortPara, data.ExtendPara));
 }
 
 function closeDevice(view) {

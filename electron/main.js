@@ -60,8 +60,8 @@ function createWindow() {
     });
 
     //打开神思设备
-    ipcMain.on('open-ss-device', () => {
-        openDevice(mainWindow);
+    ipcMain.on('open-ss-device', (event, data) => {
+        openDevice(mainWindow, data);
     });
 
     //关闭神思设备

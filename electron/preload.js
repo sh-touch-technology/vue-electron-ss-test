@@ -27,7 +27,7 @@ contextBridge.exposeInMainWorld('electron', {
     getAppVersion: () => ipcRenderer.invoke('get-app-version'),
 
     //打开神思设备
-    openSsDevice: () => ipcRenderer.send('open-ss-device'),
+    openSsDevice: (data) => ipcRenderer.send('open-ss-device', data),
 
     //关闭神思设备
     closeSsDevice: () => ipcRenderer.send('close-ss-device'),
