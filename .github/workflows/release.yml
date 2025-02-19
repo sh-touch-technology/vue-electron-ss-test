@@ -25,17 +25,12 @@ jobs:
       - name: 3.安装依赖
         run: |
           sudo apt-get update
-          # 添加 Python 3.10 的 PPA
-          sudo add-apt-repository ppa:deadsnakes/ppa -y
-          sudo apt-get update
-          # 安装 Python 3.10 及相关开发工具
-          sudo apt-get install -y python3.10 python3.10-dev python3.10-venv python3-pip
-          npm install --unsafe-perm=true --build-from-source
+          sudo apt-get install -y build-essential libffi-dev python3 python3-pip python3-dev
 
       - name: 4.为 Linux 平台单独打包
         if: matrix.os == 'ubuntu-latest'
         run: |
-          export USE_SYSTEM_FPM="true"
+          npm install -g node-gyp
           npm run electron:linux-build --linux
         env:
           GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
