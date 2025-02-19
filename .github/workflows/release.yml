@@ -23,7 +23,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: 3.安装依赖
-        run: npm install
+        run: |
+          # 安装构建依赖和libffi-dev
+          sudo apt-get update
+          sudo apt-get install -y build-essential libffi-dev
+          npm install
 
       - name: 4.为 Linux 平台单独打包
         if: matrix.os == 'ubuntu-latest'
