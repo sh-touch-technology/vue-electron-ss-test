@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]  # 使用矩阵策略分别为 Windows 和 Linux 打包
-        node-version: [16]   # 使用较低版本的 Node.js
+        node-version: [18]   # 使用较低版本的 Node.js
 
     steps:
       - name: 1.读取仓库
