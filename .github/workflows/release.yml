@@ -26,11 +26,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libffi-dev python3 python3-pip python3-dev
+          npm install
+          npm install -g node-gyp
 
       - name: 4.为 Linux 平台单独打包
         if: matrix.os == 'ubuntu-latest'
         run: |
-          npm install -g node-gyp
           npm run electron:linux-build --linux
         env:
           GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
