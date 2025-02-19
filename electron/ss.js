@@ -6,17 +6,19 @@ const path = require('path');
 const { printLog } = require('./utils')
 
 const platform = os.platform();
-let dll = '../assets/CommonInterface.dll';
+let dll_path;
+let dll;
 const appPath = app.getAppPath();
 if (platform === 'win32') {
     const arch = process.arch;
+    dll = 'CommonInterface';
     if (arch === 'x64') {
         //dll = path.resolve(__dirname, '..\\assets\\win_64\\CommonInterface.dll');
-        dll = path.join(__dirname, '..', 'assets', 'win_64', 'CommonInterface.dll');
+        dll_path = path.join(__dirname, '..', 'assets', 'win_64', 'CommonInterface.dll');
     }
     else if (arch === 'ia32') {
         //dll = path.resolve(__dirname, '..\\assets\\win_32\\CommonInterface.dll');
-        dll = path.join(__dirname, '..', 'assets', 'win_32', 'CommonInterface.dll');
+        dll_path = path.join(__dirname, '..', 'assets', 'win_32', 'CommonInterface.dll');
     }
     else {
         printLog('当前系统架构不支持：' + arch);
@@ -24,24 +26,22 @@ if (platform === 'win32') {
     }
 }
 else {
-    dll = '/opt/ss-test/assets/linux/libCommonInterface.so';
+    dll = 'libCommonInterface';
+    dll_path = '/opt/ss-test/assets/linux/libCommonInterface.so';
 }
-console.log('app path:' + appPath);
-console.log('dll path test1:' + dll + fs.existsSync(dll));
-console.log('dll path test2:' + path.resolve(__dirname, '..', 'assets', 'linux', 'libCommonInterface.so') + fs.existsSync(path.resolve(__dirname, '..', 'assets', 'linux', 'libCommonInterface.so')));
-console.log('dll path test3:' + '/opt/ss-test/assets/linux/libCommonInterface.so' + fs.existsSync('/opt/ss-test/assets/linux/libCommonInterface.so'));
+console.log('dll path test1:' + dll_path + fs.existsSync(dll_path));
 //使用前需要打开
-printLog('加载动态库：' + dll);
+printLog('加载动态库：' + dll_path);
 open({
-    library: "CommonInterface",
-    path: dll,
+    library: dll,
+    path: dll_path,
 });
 
 //打开设备
 const ssOpenDevice = () => {
     try {
         const result = load({
-            library: "CommonInterface",  // 动态库名称
+            library: dll,  // 动态库名称
             funcName: "OpenDevice",  // 函数名称
             retType: DataType.I64,   // 返回类型为 long（通常为 I64）
             paramsType: [
@@ -73,7 +73,7 @@ const ssOpenDevice = () => {
 const ssCloseDevice = () => {
     try {
         const result = load({
-            library: "CommonInterface",  // 动态库名称
+            library: dll,  // 动态库名称
             funcName: "CloseDevice",  // 函数名称
             retType: DataType.I64,   // 返回类型为 long（通常为 I64）
             paramsType: [],
@@ -100,7 +100,7 @@ const ssCloseDevice = () => {
 function ssQueryHeartBeat() {
     try {
         const result = load({
-            library: "CommonInterface",  // 动态库名称
+            library: dll,  // 动态库名称
             funcName: "TerminalHeartBeat",    // 函数名称
             retType: DataType.I64,     // 返回值类型：long
             paramsType: [
@@ -130,7 +130,7 @@ function ssQueryHeartBeat() {
 function ssFindCard() {
     try {
         const result = load({
-            library: "CommonInterface",  // 动态库名称
+            library: dll,  // 动态库名称
             funcName: "IdFindCard",    // 函数名称
             retType: DataType.I64,     // 返回值类型：long
             paramsType: [
@@ -162,7 +162,7 @@ const ssReadCard = (cardType, infoEncoding, timeOutMs) => {
     try {
         let idCardInfo = Buffer.alloc(10240);  // 至少分配10240字节的内存来存储读取的卡信息
         const result = load({
-            library: "CommonInterface",  // 动态库名称
+            library: dll,  // 动态库名称
             funcName: "IdReadCard",    // 函数名称
             retType: DataType.I64,     // 返回值类型：long
             paramsType: [
