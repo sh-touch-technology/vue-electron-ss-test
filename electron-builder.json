@@ -1,5 +1,5 @@
 {
-    "productName": "神思读卡器测试",
+    "productName": "ss-test",
     "files": [
         "./electron",
         "./dist"
