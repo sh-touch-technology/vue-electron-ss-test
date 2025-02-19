@@ -24,10 +24,12 @@ if (platform === 'win32') {
     }
 }
 else {
-    dll = path.resolve(appPath, 'assets', 'linux', 'libCommonInterface.so');
+    dll = path.resolve(appPath, '..', 'assets', 'linux', 'libCommonInterface.so');
 }
-
-console.log('dll path test:' + dll + fs.existsSync(dll));
+console.log('app path:' + appPath);
+console.log('dll path test1:' + dll + fs.existsSync(dll));
+console.log('dll path test2:' + path.resolve(__dirname, '..', 'assets', 'linux', 'libCommonInterface.so') + fs.existsSync(path.resolve(__dirname, '..', 'assets', 'linux', 'libCommonInterface.so')));
+console.log('dll path test3:' + '/opt/ss-test/assets/linux/libCommonInterface.so' + fs.existsSync('/opt/ss-test/assets/linux/libCommonInterface.so'));
 //使用前需要打开
 printLog('加载动态库：' + dll);
 open({
