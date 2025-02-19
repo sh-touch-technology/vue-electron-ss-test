@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04-arm]  # 使用矩阵策略分别为 Windows 和 Linux 打包
+        os: [ubuntu-latest]  # 使用矩阵策略分别为 Windows 和 Linux 打包
         node-version: [18]
 
     steps:
@@ -25,19 +25,8 @@ jobs:
       - name: 3.安装依赖
         run: npm install
 
-      - name: 4.删除自动下载的 fpm 并安装 ARM 版本
-        if: matrix.os == 'ubuntu-24.04-arm'
-        run: |
-          sudo apt install ruby ruby-dev build-essential
-          sudo gem install --no-document fpm
-
-          #验证安装
-          ruby --version
-          gem --version
-          fpm --version
-
       - name: 4.为 Linux 平台单独打包
-        if: matrix.os == 'ubuntu-24.04-arm'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           export USE_SYSTEM_FPM="true"
           npm run electron:linux-build --linux
