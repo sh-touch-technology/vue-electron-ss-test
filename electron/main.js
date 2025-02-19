@@ -1,7 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const { createMainWindowView, openDialog, openMainwindowDevTools, maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow } = require('./functions');
 const { printLog, initLog } = require('./utils');
-const { openDevice, closeDevice, queryHeartBeat, readCard, findCard } = require('./ss');
+//const { openDevice, closeDevice, queryHeartBeat, readCard, findCard } = require('./ss');
+const { openDevice, readCard} = require('./ss');
 
 initLog();
 
@@ -64,25 +65,25 @@ function createWindow() {
         openDevice(mainWindow, data);
     });
 
-    //关闭神思设备
-    ipcMain.on('close-ss-device', () => {
-        closeDevice(mainWindow);
-    });
+    // //关闭神思设备
+    // ipcMain.on('close-ss-device', () => {
+    //     closeDevice(mainWindow);
+    // });
 
-    //查询神思设备心跳
-    ipcMain.on('query-ss-device-heart-beat', () => {
-        queryHeartBeat(mainWindow);
-    });
+    // //查询神思设备心跳
+    // ipcMain.on('query-ss-device-heart-beat', () => {
+    //     queryHeartBeat(mainWindow);
+    // });
 
     //神思读卡
     ipcMain.on('read-ss-card', () => {
         readCard(mainWindow);
     });
 
-    //神思寻卡
-    ipcMain.on('find-ss-card', () => {
-        findCard(mainWindow);
-    });
+    // //神思寻卡
+    // ipcMain.on('find-ss-card', () => {
+    //     findCard(mainWindow);
+    // });
 }
 
 // 这段程序将会在 Electron 结束初始化和创建浏览器窗口的时候调用部分 API 在 ready 事件触发后才能使用。
