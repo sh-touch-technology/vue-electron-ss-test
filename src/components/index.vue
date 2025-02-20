@@ -4,9 +4,6 @@
             <el-main class="main">
                 <el-descriptions :column="3" title="证件信息" border class="id_card">
                     <template #extra>
-                        <el-input v-model="PortType" style="width: 100px" />
-                        <el-input v-model="PortPara" style="width: 100px" />
-                        <el-input v-model="ExtendPara" style="width: 100px" />
                         <el-button type="primary" @click="ssOpenDevice">连接设备</el-button>
                         <el-button type="primary" @click="ssCloseDevice">关闭设备</el-button>
                         <el-button type="primary" @click="ssQueryDeviceHeartBeat">查询心跳</el-button>
@@ -69,16 +66,12 @@ const addLog = (msg) => {
     });
 };
 
-const PortType = ref('AUTO');
-const PortPara = ref('');
-const ExtendPara = ref('');
-
 const ssOpenDevice = () => {
     addLog('打开设备');
     window.electron.openSsDevice({
-        PortType: PortType.value,
-        PortPara: PortPara.value,
-        ExtendPara: ExtendPara.value
+        PortType: 'AUTO',
+        PortPara: '',
+        ExtendPara: ''
     });
 }
 

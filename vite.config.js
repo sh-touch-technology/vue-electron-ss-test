@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
-import legacy from '@vitejs/plugin-legacy';
+//import legacy from '@vitejs/plugin-legacy';
 export default defineConfig({
   base: './',
   plugins: [

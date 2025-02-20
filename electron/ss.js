@@ -2,11 +2,13 @@ const { load, DataType, open, close, arrayConstructor, define } = require('ffi-r
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
-const { printLog } = require('./utils')
+const { printLog } = require('./utils');
 
 const platform = os.platform();
 let dll_path;
 let dll;
+let load_state;
+let load_error;
 if (platform === 'win32') {
     const arch = process.arch;
     dll = 'CommonInterface';
@@ -19,8 +21,8 @@ if (platform === 'win32') {
         dll_path = path.join(__dirname, '..', 'assets', 'win_32', 'CommonInterface.dll');
     }
     else {
-        printLog('当前系统架构不支持：' + arch);
-        process.exit(1);
+        printLog('当前系统架构不支持连接读卡器操作：win_' + arch);
+        load_error = '当前系统架构不支持连接读卡器操作：win_' + arch;
     }
 }
 else {
@@ -30,18 +32,42 @@ else {
 console.log('dll path test1:' + dll_path + fs.existsSync(dll_path));
 
 //使用前需要打开
-printLog('加载动态库：' + dll_path);
-open({
-    library: dll,
-    path: dll_path,
-});
+const ssLoadLibrary = () => {
+    if (!dll_path) {
+        return false;
+    }
+
+    printLog('加载读卡器动态库：' + dll_path);
+    try {
+        open({
+            library: dll,
+            path: dll_path,
+        });
+        load_state = true;
+        printLog('读卡器动态库加载成功');
+        return true;
+    }
+    catch (error) {
+        load_error = error;
+        printLog('加载读卡器动态库失败，错误：' + error);
+        return false;
+    }
+}
 
 //打开设备
 const ssOpenDevice = async (PortType, PortPara, ExtendPara) => {
+    if (!load_state) {
+        if (!ssLoadLibrary()) {
+            return new Promise((_, reject) => {
+                reject('读卡器动态库加载失败，错误：' + load_error);
+            });
+        }
+    }
+
     if (!PortType) {
         PortType = 'AUTO';
     }
-    
+
     return load({
         library: dll,  // 动态库名称
         funcName: "OpenDevice",  // 函数名称
@@ -58,128 +84,63 @@ const ssOpenDevice = async (PortType, PortPara, ExtendPara) => {
 
 //关闭设备
 const ssCloseDevice = () => {
-    try {
-        const result = load({
-            library: dll,  // 动态库名称
-            funcName: "CloseDevice",  // 函数名称
-            retType: DataType.I64,   // 返回类型为 long（通常为 I64）
-            paramsType: [],
-            paramsValue: [],  // 传递的参数值
-        });
-        if (result === 0) {
-            return {
-                type: 'close_device', state: true, message: '设备关闭成功'
-            };
-        }
-        else {
-            return {
-                type: 'close_device', state: false, message: '设备关闭失败，返回值：' + result
-            };
-        }
-    } catch (error) {
-        return {
-            type: 'close_device', state: false, message: '设备关闭异常，错误：' + error
-        };
-    }
+    return load({
+        library: dll,
+        funcName: "CloseDevice",
+        retType: DataType.I64,
+        paramsType: [],
+        paramsValue: [],
+        runInNewThread: true,
+    });
 }
 
 //神思轮询心跳
 function ssQueryHeartBeat() {
-    try {
-        const result = load({
-            library: dll,  // 动态库名称
-            funcName: "TerminalHeartBeat",    // 函数名称
-            retType: DataType.I64,     // 返回值类型：long
-            paramsType: [
-            ],
-            paramsValue: [
-            ],
-        });
-        if (result === 0) {
-            return {
-                type: 'device_heart_beat', state: true, message: '设备心跳成功'
-            };
-        }
-        else {
-            return {
-                type: 'device_heart_beat', state: false, message: '设备心跳查询失败，返回值：' + result
-            };
-        }
-    }
-    catch (error) {
-        return {
-            type: 'device_heart_beat', state: false, message: '设备心跳查询失败，错误：' + error
-        };
-    }
+    return load({
+        library: dll,
+        funcName: "TerminalHeartBeat",
+        retType: DataType.I64,
+        paramsType: [],
+        paramsValue: [],
+        runInNewThread: true,
+    });
 }
 
 //神思寻卡
 function ssFindCard() {
-    try {
-        const result = load({
-            library: dll,  // 动态库名称
-            funcName: "IdFindCard",    // 函数名称
-            retType: DataType.I64,     // 返回值类型：long
-            paramsType: [
-            ],
-            paramsValue: [
-            ],
-        });
-        if (result === 0) {
-            return {
-                type: 'find_card',
-                state: true,
-                message: '已发现卡片'
-            };
-        } else {
-            return {
-                type: 'find_card', state: false, message: '未发现卡片，返回值：' + result
-            }
-        }
-    }
-    catch (error) {
-        return {
-            type: 'find_card', state: false, message: '寻卡异常，错误：' + error
-        }
-    }
+    return load({
+        library: dll,
+        funcName: "IdFindCard",
+        retType: DataType.I64,
+        paramsType: [],
+        paramsValue: [],
+        runInNewThread: true,
+    });
 }
 
 //神思读取二代证
 const ssReadCard = (cardType, infoEncoding, timeOutMs) => {
-    try {
-        let idCardInfo = Buffer.alloc(10240);  // 至少分配10240字节的内存来存储读取的卡信息
-        const result = load({
-            library: dll,  // 动态库名称
-            funcName: "IdReadCard",    // 函数名称
-            retType: DataType.I64,     // 返回值类型：long
+    let idCardInfo = Buffer.alloc(10240);  //至少分配10240字节的内存来存储读取的卡信息
+    return {
+        idCardInfo: idCardInfo,
+        promise_: load({
+            library: dll,
+            funcName: "IdReadCard",
+            retType: DataType.I64,
             paramsType: [
-                DataType.U8,            // CardType：字节
-                DataType.U8,            // InfoEncoding：字节
-                DataType.U8Array,        // IdCardInfo：字符串（读取的身份证信息）
-                DataType.I64,           // TimeOutMs：超时时间
+                DataType.U8,            //证件类型
+                DataType.U8,            //返回值字符编码
+                DataType.U8Array,       //待返回证件信息
+                DataType.I64,           //超时时间ms
             ],
             paramsValue: [
-                cardType,               // 传递的 CardType 参数
-                infoEncoding,           // 传递的 InfoEncoding 参数
-                idCardInfo,             // 传递的 IdCardInfo 参数
-                timeOutMs,              // 传递的 TimeOutMs 参数
+                cardType,
+                infoEncoding,
+                idCardInfo,
+                timeOutMs,
             ],
-        });
-
-        if (result === 0) {
-            return {
-                type: 'read_card', state: true, message: '读取成功', data: parseStringToObject(idCardInfo.toString('utf-8', 0, idCardInfo.indexOf(0)))
-            };
-        } else {
-            return {
-                type: 'read_card', state: false, message: '读卡失败，返回值：' + result
-            }
-        }
-    }
-    catch (error) {
-        return {
-            type: 'read_card', state: false, message: '读卡失败，异常：' + error
-        }
+            runInNewThread: true,
+        })
     }
 };
 
@@ -193,30 +154,93 @@ function openDevice(view, data) {
         }
         else {
             view.webContents.send('ss-message', {
-                type: 'open_device', state: false, message: '打开设备失败了，返回参数：' + res
+                type: 'open_device', state: false, message: '打开设备失败，返回参数：' + res
             });
         }
     }).catch((err) => {
         view.webContents.send('ss-message', {
-            type: 'open_device', state: false, message: '打开设备异常了，错误：' + err
+            type: 'open_device', state: false, message: '打开设备异常，异常：' + err
         });
     })
 }
 
 function closeDevice(view) {
-    view.webContents.send('ss-message', ssCloseDevice());
+    ssCloseDevice().then((res) => {
+        if (res === 0) {
+            view.webContents.send('ss-message', {
+                type: 'close_device', state: true, message: '设备关闭成功'
+            });
+        }
+        else {
+            view.webContents.send('ss-message', {
+                type: 'close_device', state: false, message: '设备关闭失败，返回值：' + res
+            });
+        }
+    }).catch((err) => {
+        view.webContents.send('ss-message', {
+            type: 'close_device', state: false, message: '设备关闭异常，异常：' + err
+        });
+    })
+
 }
 
 function queryHeartBeat(view) {
-    view.webContents.send('ss-message', ssQueryHeartBeat());
-}
+    ssQueryHeartBeat().then((res) => {
+        if (res === 0) {
+            view.webContents.send('ss-message', {
+                type: 'device_heart_beat', state: true, message: '设备心跳成功'
+            });
+        }
+        else {
+            view.webContents.send('ss-message', {
+                type: 'device_heart_beat', state: false, message: '设备心跳查询失败，返回值：' + res
+            });
+        }
+    }).catch((err) => {
+        view.webContents.send('ss-message', {
+            type: 'device_heart_beat', state: false, message: '设备心跳查询失败，异常：' + err
+        });
+    })
 
-function readCard(view) {
-    view.webContents.send('ss-message', ssReadCard(0x00, 0x03, 5000));
 }
 
 function findCard(view) {
-    view.webContents.send('ss-message', ssFindCard());
+    ssFindCard().then((res) => {
+        if (res === 0) {
+            view.webContents.send('ss-message', {
+                type: 'find_card', state: true, message: '已发现卡片'
+            });
+        }
+        else {
+            view.webContents.send('ss-message', {
+                type: 'find_card', state: false, message: '未发现卡片，返回值：' + res
+            });
+        }
+    }).catch((err) => {
+        view.webContents.send('ss-message', {
+            type: 'find_card', state: false, message: '寻卡异常，异常：' + err
+        });
+    });
+}
+
+function readCard(view) {
+    const result = ssReadCard(0x00, 0x03, 5000);
+    const idCardInfo = result.idCardInfo;
+    result.promise_.then((res) => {
+        if (res === 0) {
+            view.webContents.send('ss-message', {
+                type: 'read_card', state: true, message: '读取成功', data: parseStringToObject(idCardInfo.toString('utf-8', 0, idCardInfo.indexOf(0)))
+            });
+        } else {
+            view.webContents.send('ss-message', {
+                type: 'read_card', state: false, message: '读卡失败，返回值：' + res
+            });
+        }
+    }).catch((err) => {
+        view.webContents.send('ss-message', {
+            type: 'read_card', state: false, message: '读卡失败，异常：' + err
+        });
+    });
 }
 
 function parseStringToObject(str) {
