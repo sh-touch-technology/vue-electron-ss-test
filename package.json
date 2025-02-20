@@ -21,7 +21,6 @@
     "electron-log": "^5.2.4",
     "electron-reload": "^2.0.0-alpha.1",
     "element-plus": "^2.8.7",
-    "ffi-napi": "^4.0.3",
     "ffi-rs": "^1.2.5",
     "koffi": "^2.10.1",
     "node-ffi-rs": "^1.2.5",
@@ -31,13 +30,13 @@
     "vue-router": "^4.3.2"
   },
   "devDependencies": {
-    "@vitejs/plugin-legacy": "4.0.0",
-    "@vitejs/plugin-vue": "^4.0.0",
-    "electron": "^18.0.0",
+    "@vitejs/plugin-legacy": "5.3.1",
+    "@vitejs/plugin-vue": "^5.0.3",
+    "electron": "^21.4.4",
     "electron-builder": "^24.9.1",
     "sass": "^1.77.5",
     "sass-loader": "^14.2.1",
     "terser": "^5.28.1",
-    "vite": "^4.0.1"
+    "vite": "^5.0.11"
   }
 }
