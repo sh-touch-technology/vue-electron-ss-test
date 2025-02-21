@@ -6,19 +6,23 @@ const { printLog } = require('./utils');
 
 const platform = os.platform();
 let dll_path;
-let dll;
+let dll_name;
+let long_type;
 let load_state;
 let load_error;
 if (platform === 'win32') {
     const arch = process.arch;
-    dll = 'CommonInterface';
+    dll_name = 'CommonInterface';
+    long_type = DataType.I32;
     if (arch === 'x64') {
         //dll_path = path.join(__dirname, '..', 'assets', 'win_64', 'CommonInterface.dll');
-        dll_path = path.resolve(__dirname, '..\\..\\..\\assets\\win_64\\CommonInterface.dll');
+        //dll_path = path.resolve(__dirname, '..\\..\\..\\assets\\win_64\\CommonInterface.dll');
+        dll_path = path.resolve('assets/win_64/CommonInterface.dll');
     }
     else if (arch === 'ia32') {
         //dll_path = path.join(__dirname, '..', 'assets', 'win_32', 'CommonInterface.dll');
-        dll_path = path.resolve(__dirname, '..\\..\\..\\assets\\win_32\\CommonInterface.dll');
+        //dll_path = path.resolve(__dirname, '..\\..\\..\\assets\\win_32\\CommonInterface.dll');
+        dll_path = path.resolve('assets/win_32/CommonInterface.dll');
     }
     else {
         printLog('当前系统架构不支持连接读卡器操作：win_' + arch);
@@ -26,8 +30,10 @@ if (platform === 'win32') {
     }
 }
 else {
-    dll = 'libCommonInterface';
-    dll_path = '/opt/ss-test/assets/linux/libCommonInterface.so';
+    dll_name = 'libCommonInterface';
+    //dll_path = '/opt/ss-test/assets/linux/libCommonInterface.so';
+    dll_path = path.resolve('assets/linux/libCommonInterface.so');
+    long_type = DataType.I64;
 }
 console.log('dll path test1:' + dll_path + fs.existsSync(dll_path));
 
@@ -40,7 +46,7 @@ const ssLoadLibrary = () => {
     printLog('加载读卡器动态库：' + dll_path);
     try {
         open({
-            library: dll,
+            library: dll_name,
             path: dll_path,
         });
         load_state = true;
@@ -69,9 +75,9 @@ const ssOpenDevice = async (PortType, PortPara, ExtendPara) => {
     }
 
     return load({
-        library: dll,  // 动态库名称
+        library: dll_name,  // 动态库名称
         funcName: "OpenDevice",  // 函数名称
-        retType: DataType.I32,   // 返回类型为 long（通常为 I64）
+        retType: long_type,   // 返回类型为 long（通常为 I64）
         paramsType: [
             DataType.String,  // PortType 类型为字符串
             DataType.String,  // PortPara 类型为字符串
@@ -90,9 +96,9 @@ const ssCloseDevice = () => {
         });
     }
     return load({
-        library: dll,
+        library: dll_name,
         funcName: "CloseDevice",
-        retType: DataType.I32,
+        retType: long_type,
         paramsType: [],
         paramsValue: [],
         runInNewThread: true,
@@ -107,9 +113,9 @@ function ssQueryHeartBeat() {
         });
     }
     return load({
-        library: dll,
+        library: dll_name,
         funcName: "TerminalHeartBeat",
-        retType: DataType.I32,
+        retType: long_type,
         paramsType: [],
         paramsValue: [],
         runInNewThread: true,
@@ -124,9 +130,9 @@ function ssFindCard() {
         });
     }
     return load({
-        library: dll,
+        library: dll_name,
         funcName: "IdFindCard",
-        retType: DataType.I32,
+        retType: long_type,
         paramsType: [],
         paramsValue: [],
         runInNewThread: true,
@@ -147,14 +153,14 @@ const ssReadCard = (cardType, infoEncoding, timeOutMs) => {
     return {
         idCardInfo: idCardInfo,
         promise_: load({
-            library: dll,
+            library: dll_name,
             funcName: "IdReadCard",
-            retType: DataType.I32,
+            retType: long_type,
             paramsType: [
                 DataType.U8,            //证件类型
                 DataType.U8,            //返回值字符编码
                 DataType.U8Array,       //待返回证件信息
-                DataType.I32,           //超时时间ms
+                long_type,           //超时时间ms
             ],
             paramsValue: [
                 cardType,
