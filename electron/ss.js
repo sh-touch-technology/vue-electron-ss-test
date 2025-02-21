@@ -13,12 +13,12 @@ if (platform === 'win32') {
     const arch = process.arch;
     dll = 'CommonInterface';
     if (arch === 'x64') {
-        //dll = path.resolve(__dirname, '..\\assets\\win_64\\CommonInterface.dll');
-        dll_path = path.join(__dirname, '..', 'assets', 'win_64', 'CommonInterface.dll');
+        //dll_path = path.join(__dirname, '..', 'assets', 'win_64', 'CommonInterface.dll');
+        dll_path = path.resolve(__dirname, '..\\..\\..\\assets\\win_64\\CommonInterface.dll');
     }
     else if (arch === 'ia32') {
-        //dll = path.resolve(__dirname, '..\\assets\\win_32\\CommonInterface.dll');
-        dll_path = path.join(__dirname, '..', 'assets', 'win_32', 'CommonInterface.dll');
+        //dll_path = path.join(__dirname, '..', 'assets', 'win_32', 'CommonInterface.dll');
+        dll_path = path.resolve(__dirname, '..\\..\\..\\assets\\win_32\\CommonInterface.dll');
     }
     else {
         printLog('当前系统架构不支持连接读卡器操作：win_' + arch);
@@ -71,7 +71,7 @@ const ssOpenDevice = async (PortType, PortPara, ExtendPara) => {
     return load({
         library: dll,  // 动态库名称
         funcName: "OpenDevice",  // 函数名称
-        retType: DataType.I64,   // 返回类型为 long（通常为 I64）
+        retType: DataType.I32,   // 返回类型为 long（通常为 I64）
         paramsType: [
             DataType.String,  // PortType 类型为字符串
             DataType.String,  // PortPara 类型为字符串
@@ -84,10 +84,15 @@ const ssOpenDevice = async (PortType, PortPara, ExtendPara) => {
 
 //关闭设备
 const ssCloseDevice = () => {
+    if (!load_state) {
+        return new Promise((_, reject) => {
+            reject('读卡器动态库未正确加载，请先连接设备');
+        });
+    }
     return load({
         library: dll,
         funcName: "CloseDevice",
-        retType: DataType.I64,
+        retType: DataType.I32,
         paramsType: [],
         paramsValue: [],
         runInNewThread: true,
@@ -96,10 +101,15 @@ const ssCloseDevice = () => {
 
 //神思轮询心跳
 function ssQueryHeartBeat() {
+    if (!load_state) {
+        return new Promise((_, reject) => {
+            reject('读卡器动态库未正确加载，请先连接设备');
+        });
+    }
     return load({
         library: dll,
         funcName: "TerminalHeartBeat",
-        retType: DataType.I64,
+        retType: DataType.I32,
         paramsType: [],
         paramsValue: [],
         runInNewThread: true,
@@ -108,10 +118,15 @@ function ssQueryHeartBeat() {
 
 //神思寻卡
 function ssFindCard() {
+    if (!load_state) {
+        return new Promise((_, reject) => {
+            reject('读卡器动态库未正确加载，请先连接设备');
+        });
+    }
     return load({
         library: dll,
         funcName: "IdFindCard",
-        retType: DataType.I64,
+        retType: DataType.I32,
         paramsType: [],
         paramsValue: [],
         runInNewThread: true,
@@ -120,18 +135,26 @@ function ssFindCard() {
 
 //神思读取二代证
 const ssReadCard = (cardType, infoEncoding, timeOutMs) => {
+    if (!load_state) {
+        return {
+            idCardInfo: '',
+            promise_: new Promise((_, reject) => {
+                reject('读卡器动态库未正确加载，请先连接设备');
+            })
+        }
+    }
     let idCardInfo = Buffer.alloc(10240);  //至少分配10240字节的内存来存储读取的卡信息
     return {
         idCardInfo: idCardInfo,
         promise_: load({
             library: dll,
             funcName: "IdReadCard",
-            retType: DataType.I64,
+            retType: DataType.I32,
             paramsType: [
                 DataType.U8,            //证件类型
                 DataType.U8,            //返回值字符编码
                 DataType.U8Array,       //待返回证件信息
-                DataType.I64,           //超时时间ms
+                DataType.I32,           //超时时间ms
             ],
             paramsValue: [
                 cardType,
@@ -159,7 +182,7 @@ function openDevice(view, data) {
         }
     }).catch((err) => {
         view.webContents.send('ss-message', {
-            type: 'open_device', state: false, message: '打开设备异常，异常：' + err
+            type: 'open_device', state: false, message: '打开设备失败，异常：' + err
         });
     })
 }
@@ -178,7 +201,7 @@ function closeDevice(view) {
         }
     }).catch((err) => {
         view.webContents.send('ss-message', {
-            type: 'close_device', state: false, message: '设备关闭异常，异常：' + err
+            type: 'close_device', state: false, message: '设备关闭失败，异常：' + err
         });
     })
 
@@ -218,7 +241,7 @@ function findCard(view) {
         }
     }).catch((err) => {
         view.webContents.send('ss-message', {
-            type: 'find_card', state: false, message: '寻卡异常，异常：' + err
+            type: 'find_card', state: false, message: '寻卡失败，异常：' + err
         });
     });
 }
