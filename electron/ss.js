@@ -1,4 +1,5 @@
 const { load, DataType, open, close, arrayConstructor, define } = require('ffi-rs');
+const { app } = require('electron');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
