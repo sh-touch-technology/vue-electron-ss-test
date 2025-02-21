@@ -35,8 +35,10 @@ else {
     dll_path = path.resolve('assets/linux/libCommonInterface.so');
     long_type = DataType.I64;
 }
-console.log('dll path test1:' + dll_path + fs.existsSync(dll_path));
-
+console.log('dll path test:' + dll_path + fs.existsSync(dll_path));
+console.log('app.getPath(userData)' + app.getPath('userData'));
+console.log('__dirname' + __dirname);
+console.log('path.resolve(app.getPath(userData), assets)' + path.resolve(app.getPath('userData'), 'assets') + fs.existsSync(path.resolve(app.getPath('userData'), 'assets')))
 //使用前需要打开
 const ssLoadLibrary = () => {
     if (!dll_path) {
