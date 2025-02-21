@@ -33,13 +33,12 @@ if (platform === 'win32') {
 else {
     dll_name = 'libCommonInterface';
     //dll_path = '/opt/ss-test/assets/linux/libCommonInterface.so';
-    dll_path = path.resolve('assets/linux/libCommonInterface.so');
+    dll_path = path.resolve(app.getAppPath(),'assets','linux','libCommonInterface.so');
     long_type = DataType.I64;
 }
-console.log('dll path test:' + dll_path + fs.existsSync(dll_path));
-console.log('app.getPath(userData)' + app.getPath('userData'));
-console.log('__dirname' + __dirname);
-console.log('path.resolve(app.getPath(userData), assets)' + path.resolve(app.getPath('userData'), 'assets') + fs.existsSync(path.resolve(app.getPath('userData'), 'assets')))
+printLog('dll path test:' + dll_path + fs.existsSync(dll_path));
+printLog('app.getPath(exe)' + app.getPath('exe'));
+printLog('path.resolve(app.getPath(exe), assets)' + path.resolve(app.getPath('exe'), 'assets') + fs.existsSync(path.resolve(app.getPath('exe'), 'assets')))
 //使用前需要打开
 const ssLoadLibrary = () => {
     if (!dll_path) {
