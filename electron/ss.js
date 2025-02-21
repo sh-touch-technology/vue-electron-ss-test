@@ -31,14 +31,21 @@ if (platform === 'win32') {
     }
 }
 else {
+    const arch = process.arch;
     dll_name = 'libCommonInterface';
-    //dll_path = '/opt/ss-test/assets/linux/libCommonInterface.so';
-    dll_path = path.resolve(app.getAppPath(),'assets','linux','libCommonInterface.so');
     long_type = DataType.I64;
+    //dll_path = '/opt/ss-test/assets/linux/libCommonInterface.so';
+    //dll_path = path.resolve(app.getAppPath(),'assets','linux','libCommonInterface.so');
+    if (arch === 'arm64') {
+        dll_path = path.join(path.dirname(app.getPath('exe')), 'assets', 'linux_arm', 'libCommonInterface.so');
+    }
+    else if(arch ==='x64'){
+        dll_path = path.join(path.dirname(app.getPath('exe')), 'assets', 'linux_x86', 'libCommonInterface.so');
+    }
 }
-printLog('dll path test:' + dll_path + fs.existsSync(dll_path));
-printLog('app.getPath(exe)' + app.getPath('exe'));
-printLog('path.resolve(app.getPath(exe), assets)' + path.resolve(app.getPath('exe'), 'assets') + fs.existsSync(path.resolve(app.getPath('exe'), 'assets')))
+//printLog('dll path test:' + dll_path + fs.existsSync(dll_path));
+//printLog('app.getPath(exe)' + app.getPath('exe'));
+//printLog('path.resolve(app.getPath(exe), assets)' + path.resolve(app.getPath('exe'), 'assets') + fs.existsSync(path.resolve(app.getPath('exe'), 'assets')))
 //使用前需要打开
 const ssLoadLibrary = () => {
     if (!dll_path) {
