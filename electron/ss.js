@@ -42,6 +42,9 @@ else {
     else if(arch ==='x64'){
         dll_path = path.join(path.dirname(app.getPath('exe')), 'assets', 'linux_x86', 'libCommonInterface.so');
     }
+    else{
+        load_error = '当前系统架构不支持连接读卡器操作：linux_' + arch;
+    }
 }
 //printLog('dll path test:' + dll_path + fs.existsSync(dll_path));
 //printLog('app.getPath(exe)' + app.getPath('exe'));
