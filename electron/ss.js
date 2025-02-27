@@ -1,6 +1,6 @@
+const { app } = require('electron');
 const koffi = require('koffi');
 const os = require('os');
-const fs = require('fs');
 const path = require('path');
 const { printLog } = require('./utils');
 
@@ -48,7 +48,7 @@ let ssOpenDevice; //打开设备
 let ssCloseDevice; //关闭设备
 let ssQueryHeartBeat; //心跳查询
 let ssFindCard; //寻卡
-let ssIdReadCard;//读卡
+let ssIdReadCard; //读卡
 //加载动态库
 const ssLoadLibrary = () => {
     if (!dll_path) {

@@ -3,6 +3,7 @@ const { createMainWindowView, openDialog, openMainwindowDevTools, maximizeMainwi
 const { printLog, initLog } = require('./utils');
 const { openDevice, closeDevice, queryHeartBeat, readCard, findCard } = require('./ss');
 //const { openDevice, readCard} = require('./ss');
+const { callChildProcessFunc } = require('./ss_card_reader/use_card_reader');
 
 initLog();
 
@@ -15,6 +16,11 @@ function createWindow() {
 
     //创建浏览器窗口
     mainWindow = createMainWindowView();
+
+    //获取应用的exe路径
+    ipcMain.handle('get-app-exe-apth', () => {
+        return app.getPath('exe');
+    });
 
     //渲染进程调用应用程序重启
     ipcMain.handle('app-relaunch', () => {
@@ -62,7 +68,8 @@ function createWindow() {
 
     //打开神思设备
     ipcMain.on('open-ss-device', (event, data) => {
-        openDevice(mainWindow, data);
+        //openDevice(mainWindow, data);
+        callChildProcessFunc(mainWindow, 'openDevice()');
     });
 
     //关闭神思设备
@@ -77,7 +84,8 @@ function createWindow() {
 
     //神思读卡
     ipcMain.on('read-ss-card', () => {
-        readCard(mainWindow);
+        //readCard(mainWindow);
+        callChildProcessFunc(mainWindow, 'readCard()');
     });
 
     //神思寻卡

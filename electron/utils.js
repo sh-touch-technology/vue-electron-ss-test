@@ -1,4 +1,4 @@
-const { app} = require('electron')
+const { app } = require('electron')
 const log = require('electron-log/main');
 const path = require('path');
 
