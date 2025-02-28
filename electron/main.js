@@ -74,12 +74,14 @@ function createWindow() {
 
     //关闭神思设备
     ipcMain.on('close-ss-device', () => {
-        closeDevice(mainWindow);
+        //closeDevice(mainWindow);
+        callChildProcessFunc(mainWindow, 'closeDevice()');
     });
 
     //查询神思设备心跳
     ipcMain.on('query-ss-device-heart-beat', () => {
-        queryHeartBeat(mainWindow);
+        //queryHeartBeat(mainWindow);
+        callChildProcessFunc(mainWindow, 'queryHeartBeat()');
     });
 
     //神思读卡
@@ -90,7 +92,8 @@ function createWindow() {
 
     //神思寻卡
     ipcMain.on('find-ss-card', () => {
-        findCard(mainWindow);
+        //findCard(mainWindow);
+        callChildProcessFunc(mainWindow, 'findCard()');
     });
 }
 

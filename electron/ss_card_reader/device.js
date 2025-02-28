@@ -1,9 +1,17 @@
 const koffi = require('koffi');
-const os = require('os');
-const path = require('path');
-//const { printLog } = require('../utils');
 
-let app_exe_path;
+const args = process.argv.slice(2);
+let dll_path = '';
+let load_state;
+let load_error;
+
+args.forEach(arg => {
+    if (arg.startsWith('--dll_path=')) {
+        dll_path = arg.split('=')[1];
+    }
+});
+
+console.log('子进程收到的参数:pll_path' + dll_path);
 
 process.on('message', (msg) => {
     console.log('Received message from parent:', msg);
@@ -29,48 +37,6 @@ process.on('message', (msg) => {
     }
 });
 
-const platform = os.platform();
-let dll_path;
-let dll_name;
-let load_state;
-let load_error;
-if (false) {//platform === 'win32'
-    const arch = process.arch;
-    dll_name = 'CommonInterface';
-    if (arch === 'x64') {
-        dll_path = path.resolve('assets/win_64/CommonInterface.dll');
-    }
-    else if (arch === 'ia32') {
-        dll_path = path.resolve('assets/win_32/CommonInterface.dll');
-    }
-    else {
-        //printLog('当前系统架构不支持连接读卡器操作：win_' + arch);
-        load_error = '当前系统架构不支持连接读卡器操作：win_' + arch;
-    }
-}
-else {
-    const arch = process.arch;
-    dll_name = 'libCommonInterface';
-    if (!app_exe_path) {
-        process.send({
-            type: 'get_app_exe_path'
-        });
-        setTimeout(() => {
-            console.log("延迟 1 秒后执行");
-        }, 1000);
-    }
-    if (true) {//arch === 'arm64'
-        dll_path = path.join(path.dirname(app_exe_path), 'assets', 'linux_arm', 'libCommonInterface.so');
-    }
-    else if (arch === 'x64') {
-        dll_path = path.join(path.dirname(app_exe_path), 'assets', 'linux_x86', 'libCommonInterface.so');
-    }
-    else {
-        load_error = '当前系统架构不支持连接读卡器操作：linux_' + arch;
-    }
-    console.log('sp dll_path:' + dll_path);
-}
-
 let CommonInterface; //动态库
 let ssOpenDevice; //打开设备
 let ssCloseDevice; //关闭设备
@@ -78,12 +44,24 @@ let ssQueryHeartBeat; //心跳查询
 let ssFindCard; //寻卡
 let ssIdReadCard; //读卡
 
+const printLog = (msg) =>{
+    process.send({
+        type: 'ss_log',
+        data: msg
+    })
+}
+
 //加载动态库
 const ssLoadLibrary = () => {
     if (!dll_path) {
+        load_error = '身份证读卡器动态库位置获取失败';
         return false;
     }
-    //printLog('加载读卡器动态库：' + dll_path);
+    if(dll_path.includes('当前系统架构不支持连接读卡器操作')){
+        load_error = dll_path;
+        return false;
+    } 
+    printLog('加载读卡器动态库：' + dll_path);
     try {
         //动态库
         CommonInterface = koffi.load(dll_path);
@@ -99,12 +77,12 @@ const ssLoadLibrary = () => {
         ssIdReadCard = CommonInterface.func('long IdReadCard(uint8_t CardType, uint8_t InfoEncoding, char *IdCardInfo, long TimeOutMs)');
 
         load_state = true;
-        //printLog('读卡器动态库加载成功');
+        printLog('读卡器动态库加载成功');
         return true;
     }
     catch (error) {
         load_error = error;
-        //printLog('加载读卡器动态库失败，错误：' + error);
+        printLog('加载读卡器动态库失败，错误：' + error);
         return false;
     }
 }

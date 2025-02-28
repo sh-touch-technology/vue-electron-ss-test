@@ -1,28 +1,60 @@
+const os = require('os');
 const { app } = require('electron');
 const { fork } = require('child_process');
 const path = require('path');
+const { printLog } = require('../utils');
+
+const platform = os.platform();
+let dll_path;
 
 let read_card_child_process = null;
 let view = null;
 
+if (platform === 'win32') {
+    const arch = process.arch;
+    if (arch === 'x64') {
+        dll_path = path.resolve('assets/win_64/CommonInterface.dll');
+    }
+    else if (arch === 'ia32') {
+        dll_path = path.resolve('assets/win_32/CommonInterface.dll');
+    }
+    else {
+        printLog('当前系统架构不支持连接读卡器操作：win_' + arch);
+        dll_path = '当前系统架构不支持连接读卡器操作：win_' + arch;
+    }
+}
+else {
+    const arch = process.arch;
+    if (arch === 'arm64') {
+        dll_path = path.join(path.dirname(app.getPath('exe')), 'assets', 'linux_arm', 'libCommonInterface.so');
+    }
+    else if (arch === 'x64') {
+        dll_path = path.join(path.dirname(app.getPath('exe')), 'assets', 'linux_x86', 'libCommonInterface.so');
+    }
+    else {
+        printLog('当前系统架构不支持连接读卡器操作：linux_' + arch);
+        dll_path = '当前系统架构不支持连接读卡器操作：linux_' + arch;
+    }
+}
+
 // 创建或重启子进程的函数
 function createChildProcess() {
-    read_card_child_process = fork(path.join(__dirname, 'device.js')); // 启动子进程
+    read_card_child_process = fork(path.join(__dirname, 'device.js'), ['--dll_path=' + dll_path]); // 启动子进程
 
     // 监听子进程退出事件
     read_card_child_process.on('exit', (code, signal) => {
         console.log(`子进程退出，退出码: ${code}, 信号: ${signal}`);
         read_card_child_process = null;
-    });
+    }); 
 
     // 监听来自子进程的消息
     read_card_child_process.on('message', (msg) => {
         console.log('主进程收到子进程消息:', msg);
-        if(msg.type && msg.type === 'ss_result'){
+        if (msg.type && msg.type === 'ss_result') {
             view.webContents.send('ss-message', msg.data);
         }
-        if(msg.type && msg.type === 'get_app_exe_path'){
-            read_card_child_process.send(app.getPath('exe'));
+        if (msg.type && msg.type === 'ss_log') {
+            printLog(msg.data);
         }
     });
 }

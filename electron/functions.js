@@ -4,7 +4,7 @@ const path = require('path');
 //const os = require('os');
 
 //发布时改为非dev的值
-const env = 'dev';
+const env = 'dev111';
 
 //运行平台win32/linux
 //const platform = os.platform();
